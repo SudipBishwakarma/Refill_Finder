@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Refills Finder</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Niramit:200,300,400,500,600,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Squada+One" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <style type="text/css">
+        .refill-wrap { font-family: 'Niramit', sans-serif; font-size: 14px; color: #2e2e2e; font-weight: 500;}
+        .refill-finder { display: block; padding: 2em 0 0 0;}
+        .refill-finder h3 { display: block; font-family: 'Squada One', cursive; font-size: 24px; text-transform: uppercase; margin-top: 0;margin-bottom: 5px;}
+        .refill-input { float: left; width: 100%; display: block; padding: 1em; margin-bottom: 1em; background: #efefef;}
+        .refill-input h3 { display: block; font-family: 'Squada One', cursive; font-size: 24px; text-transform: uppercase; margin-top: 0;margin-bottom: 5px;}
+        .refill-input h4 { text-transform: none; font-size: 14px; font-weight: 700; }
+        .refill-input .col-md-6 p { text-align: center; margin: 10px 0;}
+        .refill-input .col-md-6 select { border-radius: 0; min-height: 40px;}
+        .refill-input .col-md-6 { position: relative;}
+        .refill-result { display: block;}
+        .refill-top { display: block;}
+        .refill-top h2 { display: block; font-size: 18px;}
+        .refill-top p { font-size: 12px;}
+        .refill-top img {width: 30%;}
+        .refill-result ul { margin: 0; padding: 0; list-style: none; display: block;}
+        .refill-result ul h3 { display: block; font-size: 16px; font-weight: 700; padding-bottom: 10px;}
+        .refill-result ul li { display: inline-block;}
+        .refill-result-list { display: block; text-align: center; font-size: 13px; border: 1px solid #f1f1f1; margin-bottom: 15px;}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 refill-wrap">
+                <div class="refill-finder">
+                    <h3>Refill Guide</h3>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus facilisis enim et nisi viverra, eget bibendum mauris mattis. Donec ut facilisis libero, sed accumsan ex. Pellentesque lacinia vel eros sit amet tristique. Nullam imperdiet semper enim, non elementum felis aliquet eu. Suspendisse faucibus consectetur nulla eget sodales.</p>
+                </div>
+                <div class="refill-input">
+                    <h3>Personalized Refill Finder</h3>
+                    <p>Select a brand and a writing type to filter refills accordingly.</p>
+                    <div>
+                        <h4>Filter by brand and writing type</h4>
+                        <div class="col-md-6" id="select-brand"></div>
+                        <div class="col-md-6" id="select-type"></div>
+                    </div>
+                </div>
+                <div class="refill-result" id="search-result"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        'use strict'
+        let brands, brandList, output, brand, refillTypes, type, refillDetail, brandData;
+        $.getJSON('./products.json',function(data){
+            brands = data;
+            output = "<select name='brand' id='brand' class='form-control'  onchange='showTypes(brands)'>";
+            output +="<option value=''>Select Brand</option>";
+            $.each(brands,function(key, value){
+                output +=`<option value="`+key+`">`+key+`</option>`;
+            });
+            output += "</select>";
+            $("#select-brand").html(output);
+        });
+
+        $.getJSON('./brands.json', function(data) {
+            brandList = data;
+        });
+
+        function showTypes(data) {
+            brand = $('#brand').val();
+            refillTypes = data[brand];
+            output = "<select name='type' id='type' class='form-control' onchange='showDetails(refillTypes, brand);'>";
+            output +="<option value=''>Select Writing Type</option>";
+            $.each(refillTypes,function(key, value){
+                output +=`<option value="`+key+`">`+key+`</option>`;
+            });
+            output += "</select>";
+            $("#select-type").html(output);
+        }
+
+        function showDetails(data, brand) {
+            type = $('#type').val();
+            refillDetail = data[type];
+            output ='<div class="refill-top">';
+            output +="<h2>"+brand+" "+type+" Refill</h2>";
+            brandData = brandList[brand][type];
+            if (brandData){
+                output +='<img src="'+brandData.img_url+'" alt="'+brand+' '+type+'" class="img-responsive">';
+                output +="<p>"+brandData.description+"</p>";
+            }
+            output +='</div>';
+            output +='<hr>';
+            output +='<ul>';
+            output +='<h3>Available Options</h3>';
+            $.each(refillDetail,function(key, value){
+                output +='<li class="col-md-4">';
+                output +='<div class="refill-result-list">';
+                output +='<a href="'+value.product_url+'" target="_blank"><img src="'+value.img_url+'" alt="" class="img-responsive"></a>';
+                output +='<p><a href="'+value.product_url+'" target="_blank">'+value.product_name+'</a></p>';
+                output +='<p>Refill Length: '+value.refill_length+'mm</p>';
+                output +='</div>';
+                output +='</li>';
+                });
+            output +='</ul>';
+            $("#search-result").html(output);
+        }
+    </script>
+  </body>
+</html>
